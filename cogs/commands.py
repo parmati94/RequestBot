@@ -4,7 +4,7 @@ from discord import app_commands
 import json
 from utils.helpers import fetch_overseerr_requests, handle_requests, approve_request, decline_request
 from logging_conf import logger
-from env import CONTENT_HEADERS
+from env import CONTENT_HEADERS, POLL_INTERVAL
 
 class Commands(commands.Cog):
     def __init__(self, bot):
@@ -42,7 +42,7 @@ class Commands(commands.Cog):
         await interaction.response.send_message(f"Notification channel set to {channel.mention}")
 
     # Task to check Overseerr for new requests
-    @tasks.loop(seconds=30)
+    @tasks.loop(seconds=POLL_INTERVAL)
     async def check_overseerr_requests(self):
         if not self.bot_ready:
             return

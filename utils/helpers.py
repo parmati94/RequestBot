@@ -1,12 +1,13 @@
 import requests
 import discord
 from logging_conf import logger
+from env import OVERSEERR_BASE_URL
 
 PLEX_ORANGE = discord.Color.from_rgb(229, 160, 13)
 
 async def fetch_overseerr_requests(headers):
     try:
-        response = requests.get('https://paulplexserver.com/api/v1/request?take=20&skip=0&filter=pending', headers=headers)
+        response = requests.get(f'{OVERSEERR_BASE_URL}/api/v1/request?take=20&skip=0&filter=pending', headers=headers)
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
@@ -65,7 +66,7 @@ async def handle_requests(bot, headers, channel_id, requests_data, processed_req
             username = request.get('requestedBy', {}).get('displayName')
             
             if tmdb_id and content_type:
-                url = f"https://paulplexserver.com/api/v1/{content_type}/{tmdb_id}"
+                url = f'{OVERSEERR_BASE_URL}/api/v1/{content_type}/{tmdb_id}'
                 content_data = await fetch_targeted_data(url, headers)
                 if content_data:
                     await send_embed(bot, channel_id, request_id, content_data, content_type, username)
@@ -75,7 +76,7 @@ async def approve_request(headers, message):
     request_id = get_request_id_from_message(message)
     if request_id:
         try:
-            response = requests.post(f'https://paulplexserver.com/api/v1/request/{request_id}/approve', headers=headers)
+            response = requests.post(f'{OVERSEERR_BASE_URL}/api/v1/request/{request_id}/approve', headers=headers)
             response.raise_for_status()
             await update_embed_status(message, 'Request approved!', discord.Color.green())
             await clear_reactions(message)
@@ -86,7 +87,7 @@ async def decline_request(headers, message):
     request_id = get_request_id_from_message(message)
     if request_id:
         try:
-            response = requests.post(f'https://paulplexserver.com/api/v1/request/{request_id}/decline', headers=headers)
+            response = requests.post(f'{OVERSEERR_BASE_URL}/api/v1/request/{request_id}/decline', headers=headers)
             response.raise_for_status()
             await update_embed_status(message, 'Request declined!', discord.Color.red())
             await clear_reactions(message)

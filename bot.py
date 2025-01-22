@@ -9,10 +9,12 @@ import textwrap
 # Check if env.py exists
 if not os.path.exists('env.py'):
     sample_env_content = textwrap.dedent("""
-        # Sample env.py
+        import os
 
-        DISCORD_BOT_TOKEN = 'your-discord-bot-token'
-        OVERSEERR_API_KEY = 'your-overseerr-api-key'
+        DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN', 'your-discord-bot-token')
+        OVERSEERR_API_KEY = os.getenv('OVERSEERR_API_KEY', 'your-overseerr-api-key')
+        OVERSEERR_BASE_URL = os.getenv('OVERSEERR_BASE_URL', 'https://sampleurl.com')
+        POLL_INTERVAL = int(os.getenv('POLL_INTERVAL', '60')) # Interval to poll overseerr for new requests
 
         CONTENT_HEADERS = {
             'X-Api-Key': OVERSEERR_API_KEY
