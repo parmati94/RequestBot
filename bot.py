@@ -5,6 +5,9 @@ from discord.ext import commands
 import asyncio
 from logging_conf import logger
 import textwrap
+from flask import Flask, request, jsonify
+from env import DISCORD_BOT_TOKEN, CONTENT_HEADERS
+from utils.helpers import handle_requests
 
 # Check if env.py exists
 if not os.path.exists('env.py'):
@@ -42,6 +45,20 @@ intents = discord.Intents.default()
 intents.message_content = True  # Enable the message content intent if needed
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+app = Flask(__name__)
+
+@app.route('/webhook', methods=['POST'])
+async def webhook():
+    data = request.json
+    logger.info(f"Received webhook data: {data}")
+    asyncio.run_coroutine_threadsafe(handle_webhook(data), bot.loop)
+    return jsonify({"status": "success"}), 200
+
+async def handle_webhook(data):
+    # Process the webhook data and handle the event
+    logger.info(f"Hit handle_webhook")
+    await handle_requests(bot, data)
+
 @bot.event
 async def on_ready():
     try:
@@ -64,4 +81,10 @@ async def main():
         logger.info(f'Failed to start bot: {e}')
 
 if __name__ == "__main__":
+    # Run the Flask app in a separate thread
+    from threading import Thread
+    flask_thread = Thread(target=lambda: app.run(host='0.0.0.0', port=5000, use_reloader=False))
+    flask_thread.start()
+
+    # Run the Discord bot
     asyncio.run(main())
