@@ -25,6 +25,7 @@ async def fetch_targeted_data(url, headers):
         return None
 
 async def send_embed(bot, embed_data):
+    logger.info('Creating embed...')
     config = load_config()
     channel_id = config.get('DISCORD_CHANNEL_ID')
     channel = bot.get_channel(channel_id)
@@ -50,7 +51,7 @@ async def send_embed(bot, embed_data):
         await message.add_reaction('❌')
 
 async def handle_requests(bot, request):
-    logger.info('Handling request')
+    logger.info('Processing request...')
     request_id = request.get('request', {}).get('request_id')
     content_type = request.get('media', {}).get('media_type')
     username = request.get('request', {}).get('requestedBy_username')
@@ -68,7 +69,6 @@ async def handle_requests(bot, request):
         'content_type': content_type,
         'seasons': seasons
     }
-    logger.info('post embed data')
     logger.debug(embed_data)
 
     await send_embed(bot, embed_data)
@@ -79,6 +79,9 @@ async def approve_request(headers, message):
         try:
             response = requests.post(f'{OVERSEERR_BASE_URL}/api/v1/request/{request_id}/approve', headers=headers)
             response.raise_for_status()
+            
+            logger.info(f"Request {request_id} successfully approved.")
+            
             await update_embed_status(message, 'Request approved!', discord.Color.green())
             await clear_reactions(message)
         except requests.RequestException as e:
@@ -90,6 +93,9 @@ async def decline_request(headers, message):
         try:
             response = requests.post(f'{OVERSEERR_BASE_URL}/api/v1/request/{request_id}/decline', headers=headers)
             response.raise_for_status()
+            
+            logger.info(f"Request {request_id} successfully declined.")
+            
             await update_embed_status(message, 'Request declined!', discord.Color.red())
             await clear_reactions(message)
         except requests.RequestException as e:

@@ -26,11 +26,22 @@ class Commands(commands.Cog):
         self.config['DISCORD_CHANNEL_ID'] = channel.id
         save_config(self.config)
         self.DISCORD_CHANNEL_ID = channel.id  # Update the attribute immediately
+        
+        logger.info(f"Notification channel set to {channel.id}")
+        
         await interaction.response.send_message(f"Notification channel set to {channel.mention}")
         
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
         if user.bot:
+            return
+        
+        if reaction.message.channel.id != self.DISCORD_CHANNEL_ID:
+            logger.info("Ignoring reaction - added on unwatched channel.")
+            return
+        
+        if not reaction.message.embeds or not reaction.message.embeds[0].footer or not reaction.message.embeds[0].footer.text.startswith("Request ID: "):
+            logger.info("Ignoring reaction - not a request embed.")
             return
 
         if reaction.emoji == '✅':

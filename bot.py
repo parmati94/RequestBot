@@ -56,7 +56,6 @@ async def webhook():
 
 async def handle_webhook(data):
     # Process the webhook data and handle the event
-    logger.info(f"Hit handle_webhook")
     await handle_requests(bot, data)
 
 @bot.event
