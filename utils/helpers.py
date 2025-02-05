@@ -85,7 +85,8 @@ async def approve_request(headers, message):
             await update_embed_status(message, 'Request approved!', discord.Color.green())
             await clear_reactions(message)
         except requests.RequestException as e:
-            await message.channel.send(f'Error approving request: {e}')
+            logger.error(f"Error accepting request: {e}")
+            await update_embed_status(message, f'Request acceptance error: {str(e)[:100]}', discord.Color.orange())
 
 async def decline_request(headers, message):
     request_id = get_request_id_from_message(message)
@@ -99,7 +100,8 @@ async def decline_request(headers, message):
             await update_embed_status(message, 'Request declined!', discord.Color.red())
             await clear_reactions(message)
         except requests.RequestException as e:
-            await message.channel.send(f'Error declining request: {e}')
+            logger.error(f"Error declining request: {e}")
+            await update_embed_status(message, f'Request decline error: {str(e)[:100]}', discord.Color.orange())
             
 async def update_embed_status(message, status, color):
     embed = message.embeds[0]

@@ -31,6 +31,10 @@ class Commands(commands.Cog):
         
         await interaction.response.send_message(f"Notification channel set to {channel.mention}")
         
+    @app_commands.command(name="ping", description="Sends the bot's latency.")
+    async def ping_slash(self, interaction: discord.Interaction):
+        await interaction.response.send_message(f"Pong! Latency is {self.bot.latency}")
+        
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
         if user.bot:
