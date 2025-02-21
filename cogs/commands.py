@@ -5,7 +5,7 @@ import json
 from utils.helpers import fetch_overseerr_requests, handle_requests, approve_request, decline_request
 from utils.config_utils import load_config, save_config
 from logging_conf import logger
-from env import CONTENT_HEADERS, POLL_INTERVAL
+from env import CONTENT_HEADERS
 
 class Commands(commands.Cog):
     def __init__(self, bot):
