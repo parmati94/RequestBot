@@ -77,6 +77,7 @@ async def approve_request(headers, message):
     request_id = get_request_id_from_message(message)
     if request_id:
         try:
+            logger.info(f"APPROVE request submitted for id: {request_id}...")
             response = requests.post(f'{OVERSEERR_BASE_URL}/api/v1/request/{request_id}/approve', headers=headers)
             response.raise_for_status()
             
@@ -92,6 +93,7 @@ async def decline_request(headers, message):
     request_id = get_request_id_from_message(message)
     if request_id:
         try:
+            logger.info(f"DECLINE request submitted for id: {request_id}...")
             response = requests.post(f'{OVERSEERR_BASE_URL}/api/v1/request/{request_id}/decline', headers=headers)
             response.raise_for_status()
             

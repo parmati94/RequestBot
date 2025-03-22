@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  request-bot:
+    image: request-bot:latest
+    container_name: overseerr-bot
+    restart: always
+    environment:
+      - LOG_LEVEL=info
+      - TZ=America/New_York
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - OVERSEERR_API_KEY=${OVERSEERR_API_KEY}
+      - OVERSEERR_BASE_URL=${OVERSEERR_BASE_URL}
+    ports:
+      - 5000:5000
+    volumes:
+      - /path/to/config.json:/app/config.json

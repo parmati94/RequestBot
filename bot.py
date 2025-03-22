@@ -1,15 +1,8 @@
 import os
-import sys
-import discord
-from discord.ext import commands
-import asyncio
-from logging_conf import logger
 import textwrap
-from flask import Flask, request, jsonify
-from env import DISCORD_BOT_TOKEN, CONTENT_HEADERS
-from utils.helpers import handle_requests
+from logging_conf import logger
 
-# Check if env.py exists
+# Check if env.py exists and create it if missing
 if not os.path.exists('env.py'):
     sample_env_content = textwrap.dedent("""
         import os
@@ -24,8 +17,7 @@ if not os.path.exists('env.py'):
     """)
     with open('env.py', 'w') as f:
         f.write(sample_env_content)
-    logger.error("env.py file is missing. A sample env.py file has been created. Please update it with your values.")
-    sys.exit(1)
+    logger.warning("env.py file is missing. A sample env.py file has been created. Update it if needed or pass environment variables via docker-compose.")
 
 # Import environment variables from env.py
 try:
@@ -34,9 +26,19 @@ except ImportError as e:
     logger.error(f"Error importing environment variables: {e}")
     sys.exit(1)
 
-# Check if required environment variables are set
-if not DISCORD_BOT_TOKEN or not CONTENT_HEADERS:
-    logger.error("Required environment variables are missing in env.py. Please set DISCORD_BOT_TOKEN and CONTENT_HEADERS.")
+import sys
+import discord
+from discord.ext import commands
+import asyncio
+from flask import Flask, request, jsonify
+from utils.helpers import handle_requests
+
+# Check if required environment variables are set and not using default placeholder values
+if DISCORD_BOT_TOKEN == 'your-discord-bot-token' or \
+   os.getenv('OVERSEERR_API_KEY') == 'your-overseerr-api-key' or \
+   os.getenv('OVERSEERR_BASE_URL') == 'https://sampleurl.com':
+    logger.error("Required environment variables are missing or using default placeholder values in env.py. "
+                 "Please set DISCORD_BOT_TOKEN, OVERSEERR_API_KEY, and OVERSEERR_BASE_URL.")
     sys.exit(1)
 
 # Initialize the bot with a command prefix and intents
