@@ -8,6 +8,11 @@ class CustomTimedRotatingFileHandler(TimedRotatingFileHandler):
         self.baseFilename = os.path.join(log_dir, f"logfile_{datetime.datetime.now().strftime('%Y-%m-%d')}.log")
         TimedRotatingFileHandler.doRollover(self)
 
+class SuppressConnectionClosedFilter(logging.Filter):
+    def filter(self, record):
+        # Suppress logs containing "ConnectionClosed"
+        return "ConnectionClosed" not in record.getMessage()
+
 log_level = os.getenv('LOG_LEVEL', 'INFO').upper()
 numeric_level = getattr(logging, log_level, None)
 
@@ -26,8 +31,12 @@ if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
 # Create a timed rotating file handler that creates a new file every day and keeps logs for a week
-# The log files are named with the current date
-file_handler = CustomTimedRotatingFileHandler(os.path.join(log_dir, f"logfile_{datetime.datetime.now().strftime('%Y-%m-%d')}.log"), when='midnight', interval=1, backupCount=7)
+file_handler = CustomTimedRotatingFileHandler(
+    os.path.join(log_dir, f"logfile_{datetime.datetime.now().strftime('%Y-%m-%d')}.log"),
+    when='midnight',
+    interval=1,
+    backupCount=7
+)
 file_handler.setLevel(numeric_level)
 
 # Create a console handler
@@ -43,8 +52,20 @@ console_handler.setFormatter(formatter)
 logger = logging.getLogger()
 logger.setLevel(numeric_level)
 
-print(f"Log level set to: {logging.getLevelName(logger.level)}")
-
 # Add both handlers to the root logger
 logger.addHandler(file_handler)
 logger.addHandler(console_handler)
+
+# Apply the SuppressConnectionClosedFilter to both handlers
+suppress_filter = SuppressConnectionClosedFilter()
+file_handler.addFilter(suppress_filter)
+console_handler.addFilter(suppress_filter)
+
+# Apply the SuppressConnectionClosedFilter to specific discord loggers
+discord_client_logger = logging.getLogger('discord.client')
+discord_client_logger.addFilter(suppress_filter)
+
+discord_gateway_logger = logging.getLogger('discord.gateway')
+discord_gateway_logger.addFilter(suppress_filter)
+
+print(f"Log level set to: {logging.getLevelName(logger.level)}")

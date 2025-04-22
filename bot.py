@@ -68,6 +68,14 @@ async def on_ready():
     except Exception as e:
         logger.info(f'Error syncing commands: {e}')
     logger.info(f'Logged in as {bot.user.name}')
+    
+@bot.event
+async def on_disconnect():
+    logger.warning("Bot disconnected from Discord. Attempting to reconnect...")
+
+@bot.event
+async def on_resumed():
+    logger.info("Bot successfully resumed session.")  
 
 async def main():
     try:
